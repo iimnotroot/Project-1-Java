@@ -3,7 +3,7 @@ public final class Rect extends SimpleFigure{
     public int sizey;
 
     /**
-     * Creates a Rectangle with a min Point and max Point
+     * Method to create a Rectangle with a min Point and max Point
      */
 
     public Rect(Point pmin, Point pmax) {
