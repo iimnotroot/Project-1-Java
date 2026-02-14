@@ -1,9 +1,11 @@
-public final class Rect extends SimpleFigure{
-    public int sizex;
-    public int sizey;
+package org.dmoreno.figures;
+
+public final class Rect extends SimpleFigure {
+    private final int sizex;
+    private final int sizey;
 
     /**
-     * Method to create a Rectangle with a min Point and max Point
+     * Method to create a Rectangle with a min org.dmoreno.figures.Point and max org.dmoreno.figures.Point
      */
 
     public Rect(Point pmin, Point pmax) {

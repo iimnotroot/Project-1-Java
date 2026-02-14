@@ -1,8 +1,10 @@
-public class SimpleFigure extends Figure{
+package org.dmoreno.figures;
+
+public class SimpleFigure extends Figure {
     Point pos;
 
     /**
-     * Creates new Point from x and y
+     * Creates new org.dmoreno.figures.Point from x and y
      */
 
     public SimpleFigure(int x, int y) {
@@ -10,8 +12,8 @@ public class SimpleFigure extends Figure{
     }
 
     /**
-     * Creates new Point from a Point
-     * @param pos Point for the SimpleFigure
+     * Creates new org.dmoreno.figures.Point from a org.dmoreno.figures.Point
+     * @param pos org.dmoreno.figures.Point for the org.dmoreno.figures.SimpleFigure
      */
 
     public SimpleFigure(Point pos){
@@ -19,7 +21,7 @@ public class SimpleFigure extends Figure{
     }
 
     /**
-     * Returns the Point of the SimpleFigure
+     * Returns the org.dmoreno.figures.Point of the org.dmoreno.figures.SimpleFigure
      */
     @Override
     public Point pos() {
@@ -27,9 +29,9 @@ public class SimpleFigure extends Figure{
     }
 
     /**
-     * Moves the position of the Point
-     * @param dx Value to displace the Point in x-axis
-     * @param dy Value to displace the Point in y-axis
+     * Moves the position of the org.dmoreno.figures.Point
+     * @param dx Value to displace the org.dmoreno.figures.Point in x-axis
+     * @param dy Value to displace the org.dmoreno.figures.Point in y-axis
      */
     @Override
     public void move(int dx, int dy) {

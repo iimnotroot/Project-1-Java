@@ -1,3 +1,5 @@
+package org.dmoreno.figures;
+
 public class Square extends SimpleFigure {
     public int size;
     /**

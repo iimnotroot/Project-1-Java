@@ -1,3 +1,11 @@
+package org.dmoreno.main;
+
+import org.dmoreno.figures.Figure;
+import org.dmoreno.figures.Point;
+import org.dmoreno.figures.Rect;
+import org.dmoreno.figures.Square;
+import org.dmoreno.group.Group;
+
 public class pj1 {
     public static void main (String[] args) {
         Point p = new Point(1,2);
@@ -6,13 +14,23 @@ public class pj1 {
         Figure fig1 = new Square(p,4);
         Figure fig2 = new Rect(pmin,pmax);
 
-        Group group = new Group();
-        group.add(fig1);
-        group.add(fig2);
-        System.out.println(group.toString());
+        Group group1 = new Group("figures1");
+        group1.add(fig1);
+        group1.add(fig2);
+        System.out.println(group1.toString());
 
-        group.drop(1);
-        System.out.println(group.toString());
+        group1.drop(1);
+        System.out.println(group1.toString());
+
+        Figure fig3 = new Square(p,7);
+        Figure fig4 = new Rect(pmin,pmax);
+        fig4.move(6,7);
+
+        Group group2 = new Group("figures2",fig3, fig4);
+        System.out.println(group2.toString());
+
+        group2.drop(1);
+        System.out.println(group2.toString());
 
     }
 }

@@ -1,7 +1,9 @@
+package org.dmoreno.figures;
+
 public abstract class Figure {
 
     /**
-     * Returns the main Point of the SimpleFigure
+     * Returns the main org.dmoreno.figures.Point of the org.dmoreno.figures.SimpleFigure
      */
 
     public abstract Point pos();
