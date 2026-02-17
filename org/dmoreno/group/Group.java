@@ -25,8 +25,9 @@ public class Group extends Figure {
     }
     @Override
     public Point pos(){
-        if (pos_group != null) {
+        if (pos_group == null) {
             System.err.println("error: there is no Figure in the group");
+            System.exit(1);
         }
         return pos_group;
     }
@@ -39,9 +40,10 @@ public class Group extends Figure {
     public void add(Figure fig){
         if (group == null) {
             System.err.println("error: Figure can not be added because Group is null");
+            System.exit(1);
         } else {
             if (current_position == 0) {
-                pos_group = fig.pos();
+                pos_group = new Point(fig.pos().x,fig.pos().y);
             }
             group = Arrays.copyOf(group, (group.length + 1));
             group[current_position] = fig;
@@ -51,19 +53,25 @@ public class Group extends Figure {
 
     public void drop(int position) { //For me, it feels more accurate to drop by name instead of by position
         int i;
-        int u;
 
-        if (position < group.length) {
+        if (position < group.length && position >= 0) {
             for (i=position; i < group.length; i++) {
-                if (i == (group.length - 1) ) {
-                    group = Arrays.copyOf(group, i);
-                } else {
-                    u = i + 1;
-                    group[i] = group[u];
+                if (i != (group.length - 1)) {
+                    group[i] = group[i+1];
                 }
             }
+            group = Arrays.copyOf(group, group.length - 1);
+            current_position--;
+
+            if (group.length == 0) {
+                pos_group = null;
+            } else if (position == 0) {
+                pos_group = new Point(group[0].pos().x, group[0].pos().y);
+            }
+
         } else {
             System.err.println("error: position exceeds the length of the array group");
+            System.exit(1);
         }
 
     }
