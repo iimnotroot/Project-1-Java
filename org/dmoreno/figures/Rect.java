@@ -14,6 +14,28 @@ public final class Rect extends SimpleFigure {
         sizey = pmax.y - pmin.y;
     }
 
+    public Rect(String[] args) {
+        this (
+                parsePoint(args, 1, 2),
+                parsePoint(args, 3 ,4)
+        );
+    }
+
+    private static Point parsePoint(String[] args, int idx1, int idx2) {
+        try {
+            if (args.length != 5) {
+                throw new IllegalArgumentException("Rect Xmin Ymin Xmax Ymax");
+            }
+            int x = Integer.parseInt(args[idx1]);
+            int y = Integer.parseInt(args[idx2]);
+            return new Point(x,y);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("X and Y must be Integers");
+        }
+    }
+
+
+
     @Override
     public String toString() {
         Point max = new Point(pos.x, pos.y);

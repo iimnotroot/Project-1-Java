@@ -1,5 +1,3 @@
-package org.dmoreno.main;
-
 import org.dmoreno.figures.Figure;
 import org.dmoreno.figures.Point;
 import org.dmoreno.figures.Rect;
@@ -35,8 +33,10 @@ public class pj1 {
         Figure fig5 = new Square(p,7);
         Figure fig6 = new Rect(pmin,pmax);
         fig4.move(6,7);
+        Figure fig7 = Figure.parse("Circle 4 5 5");
 
         Group group2 = new Group("figures2",fig5, fig6);
+        group2.add(fig7);
         System.out.println(group2.toString());
 
         group2.drop(1);

@@ -32,9 +32,12 @@ public class Group extends Figure {
         return pos_group;
     }
     @Override
-    public void move(int dx, int dy) { //How can I implement?? Move Figure and upload pos_group? Move only pos_group?
-        pos_group.x += dx;
-        pos_group.y += dy;
+    public void move(int dx, int dy) {
+        int i;
+        for (i=0; i < group.length; i++) {
+            group[i].move(dx,dy);
+        }
+        pos_group.move(dx,dy);
     }
 
     public void add(Figure fig){
@@ -51,7 +54,7 @@ public class Group extends Figure {
         }
     }
 
-    public void drop(int position) { //For me, it feels more accurate to drop by name instead of by position
+    public void drop(int position) {
         int i;
 
         if (position < group.length && position >= 0) {
@@ -90,4 +93,5 @@ public class Group extends Figure {
         }
         return result;
     }
+
 }

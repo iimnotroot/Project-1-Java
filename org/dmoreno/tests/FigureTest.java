@@ -1,0 +1,47 @@
+package org.dmoreno.tests;
+
+import org.dmoreno.figures.*;
+import org.junit.jupiter.api.Test;
+import org.dmoreno.group.Group;
+
+import java.util.Objects;
+
+
+public class FigureTest {
+
+    @Test
+    public void testCreateGroup() {
+        Figure fig1 = Figure.parse("Square 1 3 5");
+        Figure fig2 = new Circle(new Point(1,2), 4);
+        Figure fig3 = Figure.parse("Line 1 4 5 8");
+
+        Group group1 = new Group("Figures1", fig1, fig2, fig3);
+    }
+
+    @Test
+    public void testCreateFigures() {
+        Figure fig1 = new Circle(new Point(3,2),5);
+        Figure fig2 = new Line(new Point(1,2), new Point(3,4));
+        Figure fig3 = new Square(new Point(1,2),3);
+        Figure fig4 = new Rect(new Point(4,3), new Point(5,6));
+
+        Group group1 = new Group("figures1", fig1, fig2, fig3, fig4);
+        group1.move(3,4);
+
+        Figure fig5 = Figure.parse("Circle 3 2 5");
+        Figure fig6 = Figure.parse("Line 1 2 3 4");
+        Figure fig7 = Figure.parse("Square 1 2 3");
+        Figure fig8 = Figure.parse("Rect 4 3 5 6");
+
+        Group group2 = new Group("figures1", fig5, fig6, fig7, fig8);
+        group2.move(3,4);
+        if (!Objects.equals(group1.toString(), group2.toString())) {
+            System.err.println("Strings are not equal");
+            System.exit(1);
+        }
+
+        System.out.println(group1.toString());
+        System.out.println(group2.toString());
+
+    }
+}

@@ -18,6 +18,38 @@ public class Circle extends SimpleFigure{
         radius = r;
     }
 
+    public Circle(String[] args) {
+        this(
+                parsePoint(args),
+                parseSize(args)
+        );
+    }
+
+    private static Point parsePoint(String[] args) {
+        if (args.length != 4) {
+            throw new IllegalArgumentException("Circle X Y radius");
+        }
+        try {
+            int x = Integer.parseInt(args[1]);
+            int y = Integer.parseInt(args[2]);
+            return new Point(x,y);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("X and Y must be integer numbers");
+        }
+    }
+
+    private static int parseSize(String[] args){
+        try {
+            int num = Integer.parseInt(args[3]);
+            if (num <= 0) {
+                throw new IllegalArgumentException("Radius must be a positive number");
+            }
+            return num;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Radius must be an integer number");
+        }
+    }
+
     public int getRadius() {
         return radius;
     }

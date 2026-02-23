@@ -12,6 +12,39 @@ public class Square extends SimpleFigure {
         super(p);
         size = num;
     }
+
+    public Square(String[] args) {
+        this(
+            parasePoint(args),
+            parseSize(args)
+        );
+    }
+
+    private static Point parasePoint(String[] args) {
+        try {
+            if (args.length != 4) {
+                throw new IllegalArgumentException("Square X Y size");
+            }
+            int x = Integer.parseInt(args[1]);
+            int y = Integer.parseInt(args[2]);
+            return new Point(x,y);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("X and Y must be integers");
+        }
+    }
+
+    private static int parseSize(String[] args) {
+        try {
+            int num = Integer.parseInt(args[3]);
+            if (num <= 0) {
+                throw new IllegalArgumentException("Size of square must not be a negative number or zero");
+            }
+            return num;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Size must be an integer");
+        }
+    }
+
     @Override
     public String toString() {
         Point max = new Point(pos.x, pos.y);
