@@ -94,4 +94,8 @@ public class Group extends Figure {
         return result;
     }
 
+    public String BuilderString(){
+        return name;
+    }
+
 }

@@ -1,6 +1,11 @@
 package org.dmoreno.figures;
 
+import org.dmoreno.FigureAttributes.Color;
+import org.dmoreno.FigureAttributes.Name;
+
 public abstract class Figure {
+    public Color color;
+    public Name name;
 
     /**
      * Returns the main org.dmoreno.figures.Point of the org.dmoreno.figures.SimpleFigure
@@ -19,6 +24,12 @@ public abstract class Figure {
      */
 
     public abstract String toString();
+
+    /**
+     * Method returns a String with builder format
+     */
+
+    public abstract String BuilderString();
 
     /**
      * Factory to create Figures by a string given
@@ -51,6 +62,31 @@ public abstract class Figure {
                 default:
                     System.err.println("error: Figure name is not recognize");
                     throw new RuntimeException("Figure name unknown");
+        }
+    }
+
+    /**
+     * Set an RGB color to a Figure
+     * @param r Red Color
+     * @param g Green Color
+     * @param b Blue Color
+     */
+    public void setColor(int r, int g, int b){
+        try {
+            color = new Color(r,g,b);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setName(String str) {
+        try {
+            if (str == null) {
+                throw new RuntimeException("error: string can not be null");
+            }
+            name = new Name(str);
+        } catch (Exception e){
+            throw new RuntimeException(e);
         }
     }
 

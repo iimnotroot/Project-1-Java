@@ -1,3 +1,4 @@
+import org.dmoreno.FigureAttributes.Color;
 import org.dmoreno.figures.Figure;
 import org.dmoreno.figures.Point;
 import org.dmoreno.figures.Rect;
@@ -41,6 +42,7 @@ public class pj1 {
 
         group2.drop(1);
         System.out.println(group2.toString());
+
 
     }
 }

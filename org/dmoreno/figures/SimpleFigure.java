@@ -42,4 +42,10 @@ public class SimpleFigure extends Figure {
     public String toString(){
         return "fig:" + pos.toString();
     }
+
+    @Override
+    public String BuilderString() {
+        return pos.toString();
+    }
+
 }

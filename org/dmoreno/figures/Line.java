@@ -43,4 +43,11 @@ public class Line extends SimpleFigure {
         return " Line: [" + pos + "," + max + "]";
     }
 
+
+    public String BuilderString(){
+        Point max = new Point(pos.x, pos.y);
+        max.move(lengthx,lengthy);
+        return "Line " + pos.x + " " + pos.y + " " + max.x + " " + max.y;
+    }
+
 }

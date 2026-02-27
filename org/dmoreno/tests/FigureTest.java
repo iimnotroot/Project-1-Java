@@ -6,6 +6,8 @@ import org.dmoreno.group.Group;
 
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class FigureTest {
 
@@ -39,9 +41,45 @@ public class FigureTest {
             System.err.println("Strings are not equal");
             System.exit(1);
         }
-
         System.out.println(group1.toString());
         System.out.println(group2.toString());
+
+    }
+
+    @Test
+    public void testFigStr() {
+        Square sqr1 = new Square(new Point(1,2),5);
+        var s = sqr1.BuilderString();
+        System.out.println(s);
+        Figure fignew = Figure.parse(s);
+        if (fignew instanceof Circle) {
+            System.out.println("fig is a Circle");
+        } else {
+            System.out.println("fig is not a Circle");
+        }
+
+        assertEquals("Square 1 2 5", fignew.BuilderString());
+    }
+
+    @Test
+    public void FigureColor() {
+        Figure fig1 = new Square(new Point(1,2),5);
+        fig1.setColor(255,15,55);
+
+        Square sq1 = new Square(new Point(4,4),5);
+        sq1.setColor(4,4,4);
+
+
+        System.out.println(sq1.color.toString());
+        System.out.println(fig1.color.toString());
+    }
+
+    @Test
+    public void FigureName() {
+        Figure fig1 = new Square(new Point(1,2),5);
+        fig1.setName("Cuadrado");
+
+        System.out.println(fig1.name.toString());
 
     }
 }

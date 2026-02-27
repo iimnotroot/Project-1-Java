@@ -42,4 +42,10 @@ public final class Rect extends SimpleFigure {
         max.move(sizex,sizey);
         return " Rect: [" + pos + "," + max + "]";
     }
+
+    public String BuilderString() {
+        Point max = new Point(pos.x, pos.y);
+        max.move(sizex,sizey);
+        return "Rect " + pos.x + " " + pos.y + " " + max.x + " " + max.y;
+    }
 }

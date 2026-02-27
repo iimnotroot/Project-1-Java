@@ -66,4 +66,8 @@ public class Circle extends SimpleFigure{
     public String toString() {
         return " Circle: [" + pos + "," + "rad=" + radius + "]";
     }
+
+    public String BuilderString(){
+        return "Circle " + pos.x + " " + pos.y + " " + radius;
+    }
 }
