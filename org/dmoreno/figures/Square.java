@@ -1,5 +1,7 @@
 package org.dmoreno.figures;
 
+import java.io.BufferedReader;
+
 public class Square extends SimpleFigure {
     public int size;
     /**
@@ -56,5 +58,9 @@ public class Square extends SimpleFigure {
         Point max = new Point(pos.x, pos.y);
         max.move(size,size);
         return "Square " + pos.x + " " + pos.y + " " + size;
+    }
+
+    public static Figure parse(String[] args, BufferedReader rd) {
+        return new Square(args);
     }
 }

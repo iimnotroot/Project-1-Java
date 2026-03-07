@@ -3,6 +3,11 @@ package org.dmoreno.figures;
 import org.dmoreno.FigureAttributes.Color;
 import org.dmoreno.FigureAttributes.Name;
 
+import java.io.BufferedReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+
 public abstract class Figure {
     public Color color;
     public Name name;
@@ -46,22 +51,46 @@ public abstract class Figure {
             return null;
         }
         String[] args = str.split("\\s");
-        switch (args[0]) {
-                case "Circle":
-                    return new Circle(args);
+        Parser p = parsers.getOrDefault(args[0], null);
+        if (p == null) {
+            throw new RuntimeException("error: figure unknown");
+        }
+        return p.parse(args, null);
+    }
 
-                case "Rect":
-                    return new Rect(args);
+    public static ArrayList<Figure> ReadAllFrom(BufferedReader rd){
+        ArrayList<Figure> fig_arr= new ArrayList<Figure>();
+        try{
+            var line = rd.readLine();
+            while(line != null){
+                var args = line.split(" ");
+                Parser p = parsers.getOrDefault(args[0], null);
+                if (p==null) {
+                    throw new RuntimeException("error: figure unknown");
+                }
+                fig_arr.add(p.parse(args, rd));
+                line = rd.readLine();
+            }
+        } catch  (Exception e){
+            throw new RuntimeException("error reading line");
+        }
+        return fig_arr;
+    }
 
-                case "Line":
-                    return new Line(args);
-
-                case "Square":
-                    return new Square(args);
-
-                default:
-                    System.err.println("error: Figure name is not recognize");
-                    throw new RuntimeException("Figure name unknown");
+    public static Figure Readfrom(BufferedReader rd) {
+        try {
+            var line = rd.readLine();
+            if (line == null) {
+                return null;
+            }
+            var args = line.split(" ");
+             Parser p = parsers.getOrDefault(args[0], null);
+             if (p==null) {
+                 throw new RuntimeException("error: figure unknown");
+             }
+             return p.parse(args, rd);
+        } catch (Exception e) {
+            throw new RuntimeException("error reading file");
         }
     }
 
@@ -79,6 +108,9 @@ public abstract class Figure {
         }
     }
 
+    /**
+     * Set name of the Figure
+     */
     public void setName(String str) {
         try {
             if (str == null) {
@@ -88,6 +120,20 @@ public abstract class Figure {
         } catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    interface Parser {
+        Figure parse(String[] args, BufferedReader rd);
+    }
+
+    public static HashMap<String, Parser> parsers;
+
+    static {
+        parsers = new HashMap<>();
+        parsers.put("Circle", Circle::parse);
+        parsers.put("Square", Square::parse);
+        parsers.put("Line", Line::parse);
+        parsers.put("Rect", Rect::parse);
     }
 
 }

@@ -1,5 +1,7 @@
 package org.dmoreno.figures;
 
+import java.io.BufferedReader;
+
 public final class Rect extends SimpleFigure {
     private final int sizex;
     private final int sizey;
@@ -47,5 +49,9 @@ public final class Rect extends SimpleFigure {
         Point max = new Point(pos.x, pos.y);
         max.move(sizex,sizey);
         return "Rect " + pos.x + " " + pos.y + " " + max.x + " " + max.y;
+    }
+
+    public static Figure parse(String[] args, BufferedReader rd) {
+        return new Rect(args);
     }
 }

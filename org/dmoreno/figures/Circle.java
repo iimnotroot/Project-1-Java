@@ -1,5 +1,7 @@
 package org.dmoreno.figures;
 
+import java.io.BufferedReader;
+
 public class Circle extends SimpleFigure{
     private int radius;
 
@@ -64,10 +66,17 @@ public class Circle extends SimpleFigure{
 
     @Override
     public String toString() {
+        if (this.color != null || this.name != null) {
+            return " Circle: [" + pos + "," + "rad=" + radius + "]" + "Attributes:" + this.color + " " + this.name.toString();
+        }
         return " Circle: [" + pos + "," + "rad=" + radius + "]";
     }
 
     public String BuilderString(){
         return "Circle " + pos.x + " " + pos.y + " " + radius;
+    }
+
+    public static Figure parse(String[] args, BufferedReader rd) {
+        return new Circle(args);
     }
 }

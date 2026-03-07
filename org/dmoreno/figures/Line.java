@@ -1,5 +1,7 @@
 package org.dmoreno.figures;
 
+import java.io.BufferedReader;
+
 public class Line extends SimpleFigure {
     private final int lengthx;
     private final int lengthy;
@@ -48,6 +50,10 @@ public class Line extends SimpleFigure {
         Point max = new Point(pos.x, pos.y);
         max.move(lengthx,lengthy);
         return "Line " + pos.x + " " + pos.y + " " + max.x + " " + max.y;
+    }
+
+    public static Figure parse(String[] args, BufferedReader rd) {
+        return new Line(args);
     }
 
 }
