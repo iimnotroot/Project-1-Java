@@ -57,7 +57,7 @@ public class Draw {
         try {
             for (idx=0; idx < figureList.size(); idx++) {
                 Figure fig = figureList.get(idx);
-                if (fig_toadd.pos().equals(fig.pos())) {
+                if (fig_toadd.pos().x == fig.pos().x && fig_toadd.pos().y == fig.pos().y) {
                     return true;
                 }
             }
@@ -77,7 +77,7 @@ public class Draw {
             }
             figureList.add(fig);
         } catch (Exception e) {
-            throw new RuntimeException("error: can not add that figure to the draw");
+            throw new RuntimeException(e);
         }
     }
 
@@ -94,7 +94,7 @@ public class Draw {
                     figureList.add(grp.group_figures[idx]);
             }
         } catch (Exception e) {
-            throw new RuntimeException("error: can not draw that group");
+            throw new RuntimeException(e);
         }
 
 

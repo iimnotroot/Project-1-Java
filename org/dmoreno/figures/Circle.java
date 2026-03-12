@@ -66,9 +66,6 @@ public class Circle extends SimpleFigure{
 
     @Override
     public String toString() {
-        if (this.color != null || this.name != null) {
-            return " Circle: [" + pos + "," + "rad=" + radius + "]" + "Attributes:" + this.color + " " + this.name.toString();
-        }
         return " Circle: [" + pos + "," + "rad=" + radius + "]";
     }
 

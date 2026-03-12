@@ -149,6 +149,10 @@ public class FigureTest {
         Group group1 = new Group("figures1", fig1, fig2, fig3, fig4);
         Draw draw1 = new Draw(group1, "/home/dontlookatme/IdeaProjects/Pj1/draw1.txt");
         draw1.sketch();
+        Figure fig5 = new Line(new Point(4,3), new Point(4,6));
+        draw1.add(fig5);
+        draw1.sketch();
+
     }
 
     @Test
