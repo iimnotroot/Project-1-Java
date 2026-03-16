@@ -100,6 +100,18 @@ public class Draw {
 
     }
 
+    public void drop(Figure fig) {
+        try {
+            if (fig==null) {
+                throw new RuntimeException("error: figure is null");
+            }
+            figureList.remove(fig);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public void sketch() {
         BufferedWriter wr = null;
         try {

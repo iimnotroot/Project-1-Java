@@ -143,14 +143,17 @@ public class FigureTest {
     public void DrawTest() {
         Figure fig1 = new Circle(new Point(3,2),5);
         Figure fig2 = new Line(new Point(1,2), new Point(3,4));
-        Figure fig3 = new Square(new Point(1,2),3);
+        Figure fig3 = new Square(new Point(1,5),3);
         Figure fig4 = new Rect(new Point(4,3), new Point(5,6));
 
         Group group1 = new Group("figures1", fig1, fig2, fig3, fig4);
         Draw draw1 = new Draw(group1, "/home/dontlookatme/IdeaProjects/Pj1/draw1.txt");
         draw1.sketch();
-        Figure fig5 = new Line(new Point(4,3), new Point(4,6));
+        Figure fig5 = new Line(new Point(2,3), new Point(4,6));
         draw1.add(fig5);
+        draw1.sketch();
+
+        draw1.drop(fig5);
         draw1.sketch();
 
     }
@@ -162,4 +165,5 @@ public class FigureTest {
         fig1.setColor(50,255,0);
         System.out.println(fig1.toString());
     }
+
 }
