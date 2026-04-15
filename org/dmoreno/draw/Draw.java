@@ -129,6 +129,7 @@ public class Draw {
                 wr.write(fig.toString());
                 System.out.println("Drawing figure: " + fig.toString());
                 wr.newLine();
+                wr.flush();
             }
             wr.close();
         } catch (Exception e) {
