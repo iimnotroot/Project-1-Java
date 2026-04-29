@@ -55,7 +55,12 @@ public class TestMsg {
 
     @Test
     public void testNewdib() throws IOException {
-        testPack(new Msg.Tnewdib("Circle 10 20 5", null));
+        testPack(new Msg.Tnewdib("Dib1", 5,null));
+    }
+
+    @Test
+    public void testNewfig() throws IOException {
+        testPack(new Msg.Tnewfig("Circle 10 20 5", 0,null));
     }
 
 

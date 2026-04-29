@@ -14,6 +14,8 @@ public class Msg {
     public static final int Tflush = 20; // req[4]
     public static final int Rflush = 21; //
 
+    public static final int Texit = 22;
+
     public static final int Tvers = 34; // vers[s] nick[s] buffsize[int]
     public static final int Rvers = 35; // vers[s] buffsize[int]
     public static final int Rerror = 41; // msg[s]
@@ -25,6 +27,11 @@ public class Msg {
     public static final int Rlistdib = 55; // n[4] name[s] ...
     public static final int Tlistfigs = 56; // dib[4] pos[4] n[4]
     public static final int Rlistfigs = 57; // n[4] id[4] ...
+    public static final int Tnewfig = 58; // args[s]
+    public static final int Rnewfig = 59; // id[4]
+    public static final int Tadddib = 60; //id_dib[4] figs[s](id_figs split with '-')
+    public static final int Radddib = 61;
+
 
     public int tag;
     public int kind;
@@ -48,6 +55,7 @@ public class Msg {
             buf.order(ByteOrder.LITTLE_ENDIAN);
         }
         this.buf = buf;
+        buf.clear();
         buf.order(ByteOrder.LITTLE_ENDIAN);
         if (unpack) {
             getTag();
@@ -87,12 +95,11 @@ public class Msg {
         return this.dsize;
     }
 
-    protected void makeHdr(int tag, int kind) {
+    protected void makeHdr(int newtag, int kind) {
         buf.clear();
-        setTag(tag);
+        setTag(newtag);
         setKind(kind);
         setDsize(0);
-
         buf.position(HDRSIZE);
         buf.limit(buf.capacity());
 
@@ -107,7 +114,7 @@ public class Msg {
 
     protected void rdMode() {
         buf.position(0);
-        buf.limit(HDRSIZE+dsize);
+        buf.limit(HDRSIZE + dsize);
     }
 
     protected void dataDone() {
@@ -117,10 +124,10 @@ public class Msg {
     }
 
     public static int readn(ReadableByteChannel ch, ByteBuffer buf, int n) {
-        buf.limit(buf.position()+ n);
+        buf.limit(buf.position() + n);
         try {
             int total = 0;
-            while(total < n) {
+            while (total < n) {
                 int br = ch.read(buf);
                 if (br < 0) {
                     break;
@@ -173,6 +180,7 @@ public class Msg {
         }
     }
 
+
     public static Msg readFrom(ReadableByteChannel ch) {
         Msg msg = new Msg();
         if (!msg.readHdr(ch)) {
@@ -184,13 +192,33 @@ public class Msg {
                 return new Rerror(msg.buf);
             case Tnewdib:
                 return new Tnewdib(msg.buf);
+            case Rnewdib:
+                return new Rnewdib(msg.buf);
+            case Tnewfig:
+                return new Tnewfig(msg.buf);
+            case Rnewfig:
+                return new Rnewfig(msg.buf);
+            case Tlistfigs:
+                return new Tlistfigs(msg.buf);
+            case Rlistfigs:
+                return new Rlistfigs(msg.buf);
+            case Tdeldib:
+                return new Tdeldib(msg.buf);
+            case Rdeldib:
+                return new Rdeldib(msg.buf);
+            case Tadddib:
+                return new Tadddib(msg.buf);
+            case Radddib:
+                return new Radddib(msg.buf);
+            case Texit:
+                return new Texit(msg.buf);
             default:
-                throw new RuntimeException("unkown msg kind");
+                throw new RuntimeException("unknown msg kind");
         }
     }
 
 
-    public  void writeTo(WritableByteChannel ch) {
+    public void writeTo(WritableByteChannel ch) {
         rdMode();
         try {
             ch.write(buf);
@@ -199,11 +227,6 @@ public class Msg {
         } finally {
             rdMode();
         }
-    }
-
-    public void addId(int id) {
-        buf.position(HDRSIZE);
-        buf.putInt(id);
     }
 
 
@@ -216,8 +239,8 @@ public class Msg {
 
         String msg;
 
-        public Rerror(String msg, ByteBuffer buf) {
-            super(buf, false);
+        public Rerror(String msg, ByteBuffer bufa) {
+            super(bufa, false);
             buf.clear();
             this.msg = msg;
             makeHdr(0, Rerror);
@@ -225,7 +248,7 @@ public class Msg {
             dataDone();
         }
 
-        Rerror(ByteBuffer buf) {
+        public Rerror(ByteBuffer buf) {
             super(buf, true);
             try {
                 rdMode();
@@ -245,16 +268,18 @@ public class Msg {
 
     public static class Tnewdib extends Msg {
         String name;
-        public Tnewdib(String name, ByteBuffer buf) {
-            super(buf, false);
+
+        public Tnewdib(String name, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
             buf.clear();
             this.name = name;
-            makeHdr(0, Tnewdib);
+            makeHdr(msg_tag, Tnewdib);
             addStr(name);
             dataDone();
         }
-        Tnewdib(ByteBuffer buf) {
-            super(buf, true);
+
+        public Tnewdib(ByteBuffer bufa) {
+            super(bufa, true);
             try {
                 rdMode();
                 buf.position(HDRSIZE);
@@ -269,4 +294,298 @@ public class Msg {
         }
     }
 
+    public static class Rnewdib extends Msg {
+        int id;
+
+        public Rnewdib(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Rnewdib);
+            addStr(Integer.toString(id));
+
+            dataDone();
+        }
+
+        public Rnewdib(ByteBuffer buf) {
+            super(buf, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + Integer.toString(id);
+        }
+    }
+
+    public static class Texit extends Msg {
+
+        public Texit(int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Texit);
+            dataDone();
+        }
+
+        public Texit(ByteBuffer buf) {
+            super(buf, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString();
+        }
+    }
+
+    public static class Tnewfig extends Msg {
+        String name;
+
+        public Tnewfig(String name, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.name = name;
+            makeHdr(msg_tag, Tnewfig);
+            addStr(name);
+            dataDone();
+        }
+
+        public Tnewfig(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                name = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + name;
+        }
+
+
+    }
+
+    public static class Rnewfig extends Msg {
+        int id;
+
+        public Rnewfig(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+
+            makeHdr(0, Rnewfig);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rnewfig(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + id;
+        }
+
+    }
+
+    public static class Tlistfigs extends Msg {
+        String args;
+
+        public Tlistfigs(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Tlistfigs);
+            this.args = args;
+            addStr(args);
+            dataDone();
+        }
+
+        public Tlistfigs(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + args;
+        }
+
+    }
+
+    public static class Rlistfigs extends Msg {
+        String msg;
+
+        public Rlistfigs(String msg, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.msg = msg;
+            makeHdr(0, Rlistfigs);
+            addStr(msg);
+            dataDone();
+        }
+
+        public Rlistfigs(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                msg = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + msg;
+        }
+
+    }
+
+    public static class Tdeldib extends Msg {
+        int id;
+
+        public Tdeldib(int id, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(msg_tag, Tdeldib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Tdeldib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+                ;
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + id;
+        }
+
+
+    }
+
+    public static class Rdeldib extends Msg {
+        int id;
+
+        public Rdeldib(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Rdeldib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rdeldib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+                ;
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + id;
+        }
+
+
+    }
+
+    public static class Tadddib extends Msg {
+        String args;
+        public Tadddib(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Tadddib);
+            this.args = args;
+            addStr(args);
+            dataDone();
+        }
+
+        public Tadddib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + args;
+
+        }
+
+    }
+
+    public static class Radddib extends Msg {
+        int id;
+
+        public Radddib(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Radddib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Radddib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + "figures deleted of the dib " +id;
+        }
+
+
+    }
+
+
 }
+

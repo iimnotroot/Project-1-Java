@@ -19,7 +19,7 @@ public class Req {
         Msg req = Msg.readFrom(ch);
         if (req != null) {
             m = req;
-            req.tag = m.getTag();
+            tag = m.getTag();
         }
     }
 
@@ -29,7 +29,14 @@ public class Req {
         }
         rep.setTag(tag);
         this.r = rep;
+
     }
+
+    public void replySent() {
+        this.m = null;
+        this.r = null;
+    }
+
     public void error(String s) {
         reply(new Msg.Rerror(s, r.buf));
     }

@@ -3,14 +3,17 @@ package org.dmoreno.server;
 import org.dmoreno.server.Msg;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static jdk.internal.net.http.common.Utils.close;
+import static org.dmoreno.server.Msg.*;
 
 
 public class TcpSrv {
@@ -18,6 +21,14 @@ public class TcpSrv {
     final AtomicBoolean halting;
     Thread listener;
     protected Svc svc;
+    static final HashMap<SocketChannel, Integer> hashcli;
+    private final AtomicInteger id_client = new AtomicInteger(1);
+    static final List<Req> buffsAval;
+
+    static {
+        hashcli = new HashMap<>();
+        buffsAval = new ArrayList<>();
+    }
 
     public TcpSrv(Svc svc, int port) {
         this.svc = svc;
@@ -31,8 +42,10 @@ public class TcpSrv {
     }
 
     public synchronized void run() {
+        System.out.println("Initializing server...");
+        System.out.println("Waiting for connections...");
         try {
-            listener = new Thread(this::listenerLoop);
+            listener = new Thread(this::listenerLoop); // Threads can be named with setName
             listener.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -61,15 +74,23 @@ public class TcpSrv {
         hangup();
     }
 
+    public synchronized Integer addClient(SocketChannel sck) {
+        int id = id_client.get();
+        hashcli.put(sck, id_client.getAndIncrement());
+        return id;
+    }
+
     public void listenerLoop() {
         try {
             while (!halting.get()) {
                 SocketChannel sck = srv.accept();
+                System.out.println("INFO: new connection accepted");
                 if (halting.get()) {
-                    close(sck);
+                    sck.close();
                     break;
                 }
-                Client cli = new Client(sck, srv);
+                int id_c = addClient(sck);
+                Client cli = new Client(sck, srv, id_c);
                 cli.start();
             }
         } catch (IOException e) {
@@ -79,13 +100,28 @@ public class TcpSrv {
         }
     }
 
+    public synchronized void saveReq(Req req) {
+        req.r.buf.clear();
+        req.m.buf.clear();
+        buffsAval.add(req);
+    }
+
+    public synchronized Req getReq() {
+        if (buffsAval.isEmpty()) {
+            return new Req();
+        } else {
+            return buffsAval.getFirst(); //consider using Queue method poll() gets FirstElemnt and moves the other ones
+        }
+    }
+
     private class Client extends Thread {
         ServerSocketChannel srv;
         SocketChannel sck;
-
-        public Client(SocketChannel sck, ServerSocketChannel srv) {
+        int id_c;
+        public Client(SocketChannel sck, ServerSocketChannel srv, int id_c) {
             this.sck = sck;
             this.srv = srv;
+            this.id_c = id_c;
         }
 
         public void run() {
@@ -98,6 +134,7 @@ public class TcpSrv {
 
         public void endCli() {
             try {
+                System.out.println("INFO: finishing connection...");
                 sck.finishConnect();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -106,17 +143,25 @@ public class TcpSrv {
 
         public void handle() {
             try {
-                Req r = new Req();
+                Req req = getReq();
                 while(!halting.get()) {
                     try {
-                        r.readFrom(sck);
-                        if (r.m == null) {
-                            endCli();
+                        req.readFrom(sck);
+                        if (req.m == null) {
+                            saveReq(req);
+                            return;
                         }
-                        r.reply(svc.handle(r.m));
-                        r.r.writeTo(sck);
+                        req.reply(svc.handle(req.m));
+                        if (req.r.kind == Texit) {
+                            saveReq(req);
+                            return;
+                        }
+                        System.out.println("INFO: sending to client " + id_c + " reply: " + req.r.toString());
+                        req.r.writeTo(sck);
+                        req.replySent();
+
                     } catch (Exception e) {
-                        //reply error? close connect?
+                        throw new RuntimeException(e);
                     }
                 }
             } finally {
