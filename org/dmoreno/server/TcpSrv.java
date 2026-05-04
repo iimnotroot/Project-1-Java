@@ -82,12 +82,12 @@ public class TcpSrv {
         try {
             while (!halting.get()) {
                 SocketChannel sck = srv.accept();
-                System.out.println("INFO: new connection accepted");
                 if (halting.get()) {
                     sck.close();
                     break;
                 }
                 int id_c = addClient(sck);
+                System.out.println("INFO: new connection accepted " + id_c);
                 Client cli = new Client(sck, srv, id_c);
                 cli.start();
             }
@@ -131,7 +131,7 @@ public class TcpSrv {
 
         public void endCli() {
             try {
-                System.out.println("INFO: finishing connection...");
+                System.out.println("INFO: finishing connection with " + id_c + " ...");
                 sck.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);

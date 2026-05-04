@@ -150,7 +150,7 @@ public class TcpCli {
             }
             switch (opt) {
                 case "1":
-                    System.out.println("Enter the figure type and its parameters. Examples:\nCircle 10 20 4\nSquare 5 10 4\nRect 10 5 20 3");
+                    System.out.println("Enter the figure type and its parameters. Examples:\nCircle posX posY rad\nSquare posX posY size\nRect posX1 posY1 posX2 poxY2\nLine posX1 posY1 posX2 posY2");
                     System.out.print("> ");
                     String args = sc.nextLine();
                     Figure fig;
@@ -175,11 +175,11 @@ public class TcpCli {
                     System.out.println("Enter the ID of the figure to delete:");
                     System.out.print("> ");
                     String id = sc.nextLine();
-                    if (!isValidID(opt)) {
+                    if (!isValidID(id)) {
                         System.err.println("error: please write a correct ID for the figure\"");
                         continue;
                     }
-                    continue;
+                    return new Tdelfig(Integer.parseInt(id), msg_tag, null);
                 case "4":
                     return null;
                 default:
@@ -194,11 +194,12 @@ public class TcpCli {
         while (true) {
             System.out.println("1. Draw");
             System.out.println("2. Figure");
-            System.out.println("3. Exit");
+            System.out.println("3. Group");
+            System.out.println("4. Exit");
             System.out.print("> ");
             String opt = sc.nextLine();
 
-            if (!verifyAct(opt, 3)) {
+            if (!verifyAct(opt, 4)) {
                 System.err.println("error: please select one of the options writing the number associate to");
                 continue;
 
@@ -217,8 +218,9 @@ public class TcpCli {
                         continue;
                     }
                     return m;
-
                 case "3":
+                    continue;
+                case "4":
                     return new Texit(msg_tag, null);
                 default:
                     System.err.println("Invalid option");

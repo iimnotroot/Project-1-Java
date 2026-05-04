@@ -35,6 +35,8 @@ public class Msg {
     public static final int Radddib = 61; // info[s] id[4]
     public static final int Tsketchdib = 62; // id_dib[4]
     public static final int Rsketchdib = 63; // info[s]
+    public static final int Tdelfig = 64; // id_fig[4]
+    public static final int Rdelfig = 65;
 
 
     public int tag;
@@ -226,6 +228,8 @@ public class Msg {
         parsers.put(Tlistdib, Tlistdib::new);
         parsers.put(Rlistdib, Rlistdib::new);
         parsers.put(Texit, Texit::new);
+        parsers.put(Tdelfig, Tdelfig::new);
+        parsers.put(Rdelfig, Rdelfig::new);
     }
 
 
@@ -494,7 +498,6 @@ public class Msg {
                 rdMode();
                 buf.position(HDRSIZE);
                 id = Integer.parseInt(getStr());
-                ;
             } finally {
                 rdMode();
             }
@@ -702,6 +705,57 @@ public class Msg {
         public String toString() {return super.toString() + " " + "List of dib: " + args;}
     }
 
+    public static class Tdelfig extends Msg {
+        int id;
+
+        public Tdelfig(int id, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id=id;
+            makeHdr(msg_tag, Tdelfig);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Tdelfig(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() { return super.toString() + " " + id;}
+    }
+
+    public static class Rdelfig extends Msg {
+        int id;
+
+        public Rdelfig(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(0, Rdelfig);
+            this.id = id;
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rdelfig(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {return super.toString() + " " + "Figure with ID: " +  id + " has been deleted";}
+    }
 
 }
 

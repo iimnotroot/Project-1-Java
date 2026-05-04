@@ -150,6 +150,23 @@ public class DibSvc implements Svc{
         return dib;
     }
 
+    private Integer delFig(String request) {
+        String[] args = request.split(" ");
+        Integer fig = verifyID(args[0]);
+        if (fig == null) {
+            return -1;
+        }
+        synchronized (figs) {
+            boolean exists = figs.containsKey(fig);
+            if (!exists) {
+                return -1;
+            }
+            figs.remove(fig);
+        }
+
+        return fig;
+    }
+
 
     private Integer addDib(String request) {
         String[] args = request.split(" ");
@@ -325,6 +342,12 @@ public class DibSvc implements Svc{
                     return new Rerror("error: could not list draw", req.buf);
                 }
                 return new Rlistdib(list.toString(), req.buf);
+            case Tdelfig:
+                id = delFig(req.getStr());
+                if (id < 0) {
+                    return new Rerror("error: draw do not exists", req.buf);
+                }
+                return new Rdelfig(id, req.buf);
             case Texit:
                 return new Texit(0, req.buf);
             default:
