@@ -2,7 +2,7 @@ package org.dmoreno.figures;
 
 public class SimpleFigure extends Figure {
     Point pos;
-
+    int id;
     /**
      * Creates new org.dmoreno.figures.Point from x and y
      */
@@ -40,12 +40,24 @@ public class SimpleFigure extends Figure {
     }
     @Override
     public String toString(){
-        return "fig:" + pos.toString();
+        return "fig:" + "ID: " + id + " " + pos.toString();
     }
 
     @Override
     public String BuilderString() {
         return pos.toString();
+    }
+
+    @Override
+    public void setId(Integer id) {
+        try {
+            if (id < 0) {
+                throw new RuntimeException("error: id can not be negative");
+            }
+            this.id = id;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

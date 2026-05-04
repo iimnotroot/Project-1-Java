@@ -28,6 +28,8 @@ public abstract class Figure {
      * Print line
      */
 
+    public abstract void setId(Integer id);
+
     public abstract String toString();
 
     /**

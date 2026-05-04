@@ -78,11 +78,11 @@ public class FigureTest {
     }
 
     @Test
-    public void FigureName() {
+    public void FigureId() {
         Figure fig1 = new Square(new Point(1,2),5);
-        fig1.setName("Cuadrado");
+        fig1.setId(1);
 
-        System.out.println(fig1.name.toString());
+        System.out.println(fig1.toString());
 
     }
 

@@ -51,7 +51,7 @@ public class Square extends SimpleFigure {
     public String toString() {
         Point max = new Point(pos.x, pos.y);
         max.move(size,size);
-        return " Square: [" + pos + "," + max +"]";
+        return "ID: " + id + " Square: [" + pos + "," + max +"]";
     }
 
     public String BuilderString(){

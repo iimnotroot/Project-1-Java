@@ -32,7 +32,7 @@ public class Req {
 
     }
 
-    public void replySent() {
+    public void reset() {
         this.m = null;
         this.r = null;
     }

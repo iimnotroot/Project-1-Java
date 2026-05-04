@@ -10,7 +10,7 @@ public class Group extends Figure {
     Point pos_group;
     public String name;
     int current_position = 0;
-
+    int id;
     /**
      * Creates a group of Figures, named as you want, also it can be created by giving an array of Figures or empty
      * @param group_name Name of the group
@@ -38,6 +38,18 @@ public class Group extends Figure {
             group_figures[i].move(dx,dy);
         }
         pos_group.move(dx,dy);
+    }
+
+    @Override
+    public void setId(Integer id) {
+        try {
+            if (id < 0) {
+                throw new RuntimeException("error: id can not be negative");
+            }
+            this.id = id;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void add(Figure fig){

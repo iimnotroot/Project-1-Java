@@ -42,7 +42,7 @@ public final class Rect extends SimpleFigure {
     public String toString() {
         Point max = new Point(pos.x, pos.y);
         max.move(sizex,sizey);
-        return " Rect: [" + pos + "," + max + "]";
+        return "ID: " + id + " Rect: [" + pos + "," + max + "]";
     }
 
     public String BuilderString() {

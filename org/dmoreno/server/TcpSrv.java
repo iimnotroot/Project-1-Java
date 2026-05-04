@@ -7,9 +7,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -23,11 +21,11 @@ public class TcpSrv {
     protected Svc svc;
     static final HashMap<SocketChannel, Integer> hashcli;
     private final AtomicInteger id_client = new AtomicInteger(1);
-    static final List<Req> buffsAval;
+    static final Queue<Req> buffsAval;
 
     static {
         hashcli = new HashMap<>();
-        buffsAval = new ArrayList<>();
+        buffsAval = new LinkedList<>();
     }
 
     public TcpSrv(Svc svc, int port) {
@@ -101,16 +99,15 @@ public class TcpSrv {
     }
 
     public synchronized void saveReq(Req req) {
-        req.r.buf.clear();
-        req.m.buf.clear();
-        buffsAval.add(req);
+        req.reset();
+        buffsAval.offer(req);
     }
 
     public synchronized Req getReq() {
         if (buffsAval.isEmpty()) {
             return new Req();
         } else {
-            return buffsAval.getFirst(); //consider using Queue method poll() gets FirstElemnt and moves the other ones
+            return buffsAval.poll();
         }
     }
 
@@ -135,7 +132,7 @@ public class TcpSrv {
         public void endCli() {
             try {
                 System.out.println("INFO: finishing connection...");
-                sck.finishConnect();
+                sck.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -158,7 +155,7 @@ public class TcpSrv {
                         }
                         System.out.println("INFO: sending to client " + id_c + " reply: " + req.r.toString());
                         req.r.writeTo(sck);
-                        req.replySent();
+                        req.reset();
 
                     } catch (Exception e) {
                         throw new RuntimeException(e);

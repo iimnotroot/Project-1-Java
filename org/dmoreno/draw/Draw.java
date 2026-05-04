@@ -11,6 +11,7 @@ public class Draw {
     ArrayList<Figure> figureList = new ArrayList<Figure>();
     File file;
     public Name name;
+    int id;
 
     /**
      * Create a draw giving only the path of the file
@@ -145,6 +146,12 @@ public class Draw {
             }
         }
     }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName()  {return name.toString();}
 
     public void setName(String str){
         name = new Name(str);

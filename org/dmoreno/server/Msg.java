@@ -1,18 +1,20 @@
 package org.dmoreno.server;
 
+import org.dmoreno.figures.*;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.HashMap;
 
 public class Msg {
 
     public static final int BUFFSIZE = 4096;
-
-    public static final int Tflush = 20; // req[4]
-    public static final int Rflush = 21; //
 
     public static final int Texit = 22;
 
@@ -21,16 +23,18 @@ public class Msg {
     public static final int Rerror = 41; // msg[s]
     public static final int Tnewdib = 50; // name[s]
     public static final int Rnewdib = 51; // id[4] 4 bytes en little endian
-    public static final int Tdeldib = 52; // id[4]
+    public static final int Tdeldib = 52; // info[s] id[4]
     public static final int Rdeldib = 53; //
     public static final int Tlistdib = 54; // pos[4] n[4]
     public static final int Rlistdib = 55; // n[4] name[s] ...
     public static final int Tlistfigs = 56; // dib[4] pos[4] n[4]
     public static final int Rlistfigs = 57; // n[4] id[4] ...
     public static final int Tnewfig = 58; // args[s]
-    public static final int Rnewfig = 59; // id[4]
+    public static final int Rnewfig = 59; // info[s] id[4]
     public static final int Tadddib = 60; //id_dib[4] figs[s](id_figs split with '-')
-    public static final int Radddib = 61;
+    public static final int Radddib = 61; // info[s] id[4]
+    public static final int Tsketchdib = 62; // id_dib[4]
+    public static final int Rsketchdib = 63; // info[s]
 
 
     public int tag;
@@ -132,6 +136,9 @@ public class Msg {
                 if (br < 0) {
                     break;
                 }
+                if (br == 0) {
+                    break;
+                }
                 total += br;
             }
             return total;
@@ -187,34 +194,38 @@ public class Msg {
             return null;
         }
         msg.readData(ch);
-        switch (msg.kind) {
-            case Rerror:
-                return new Rerror(msg.buf);
-            case Tnewdib:
-                return new Tnewdib(msg.buf);
-            case Rnewdib:
-                return new Rnewdib(msg.buf);
-            case Tnewfig:
-                return new Tnewfig(msg.buf);
-            case Rnewfig:
-                return new Rnewfig(msg.buf);
-            case Tlistfigs:
-                return new Tlistfigs(msg.buf);
-            case Rlistfigs:
-                return new Rlistfigs(msg.buf);
-            case Tdeldib:
-                return new Tdeldib(msg.buf);
-            case Rdeldib:
-                return new Rdeldib(msg.buf);
-            case Tadddib:
-                return new Tadddib(msg.buf);
-            case Radddib:
-                return new Radddib(msg.buf);
-            case Texit:
-                return new Texit(msg.buf);
-            default:
-                throw new RuntimeException("unknown msg kind");
+
+        Parser parser = parsers.get(msg.kind);
+        if (parser == null) {
+            throw new RuntimeException("error: unknown message kind");
         }
+        return parser.parse(msg.buf);
+    }
+
+    interface Parser {
+        Msg parse(ByteBuffer buf);
+    }
+
+    public static HashMap<Integer, Parser> parsers;
+
+    static {
+        parsers = new HashMap<>();
+        parsers.put(Rerror, Rerror::new);
+        parsers.put(Tnewdib, Tnewdib::new);
+        parsers.put(Rnewdib, Rnewdib::new);
+        parsers.put(Tnewfig, Tnewfig::new);
+        parsers.put(Rnewfig, Rnewfig::new);
+        parsers.put(Tlistfigs, Tlistfigs::new);
+        parsers.put(Rlistfigs, Rlistfigs::new);
+        parsers.put(Tdeldib, Tdeldib::new);
+        parsers.put(Rdeldib, Rdeldib::new);
+        parsers.put(Tadddib, Tadddib::new);
+        parsers.put(Radddib, Radddib::new);
+        parsers.put(Tsketchdib, Tsketchdib::new);
+        parsers.put(Rsketchdib, Rsketchdib::new);
+        parsers.put(Tlistdib, Tlistdib::new);
+        parsers.put(Rlistdib, Rlistdib::new);
+        parsers.put(Texit, Texit::new);
     }
 
 
@@ -319,7 +330,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + Integer.toString(id);
+            return super.toString() + " "+ "Draw created with ID: " + Integer.toString(id);
         }
     }
 
@@ -402,7 +413,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + id;
+            return super.toString() + " "+ "Figure created with ID: " + id;
         }
 
     }
@@ -460,7 +471,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + msg;
+            return super.toString() + " " + "List of figures: " + msg;
         }
 
     }
@@ -521,7 +532,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + id;
+            return super.toString() + " " + "Draw deleted with ID: " + id;
         }
 
 
@@ -580,10 +591,115 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + "figures deleted of the dib " +id;
+            return super.toString() + " " + "figures added to the dib " +id;
         }
 
 
+    }
+
+    public static class Tsketchdib extends Msg{
+        int id;
+
+        public Tsketchdib(int id, int msg_tag ,ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(msg_tag, Tsketchdib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Tsketchdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() { return super.toString() + " " + id;}
+    }
+
+    public static class Rsketchdib extends Msg {
+        int id;
+
+        public Rsketchdib(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Rsketchdib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rsketchdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() { return super.toString() + " " + "draw sketched with ID:" + id;}
+    }
+
+
+    public static class Tlistdib extends Msg {
+        int id;
+        public Tlistdib(int id, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id=id;
+            makeHdr(msg_tag, Tlistdib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Tlistdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() { return super.toString() + " " + id;}
+
+    }
+
+    public static class Rlistdib extends Msg {
+        String args;
+
+        public Rlistdib(String args, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.args = args;
+            makeHdr(0, Rlistdib);
+            addStr(args);
+            dataDone();
+        }
+
+        public Rlistdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {return super.toString() + " " + "List of dib: " + args;}
     }
 
 

@@ -66,7 +66,7 @@ public class Circle extends SimpleFigure{
 
     @Override
     public String toString() {
-        return " Circle: [" + pos + "," + "rad=" + radius + "]";
+        return "ID: " + id + " Circle: [" + pos + "," + "rad=" + radius + "]";
     }
 
     public String BuilderString(){
