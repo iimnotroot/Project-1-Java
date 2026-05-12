@@ -117,7 +117,7 @@ public class TcpCli {
                     System.out.print("> ");
                     opt = sc.nextLine();
                     if (!validArgs(opt)) {
-                        System.err.println("error: please write a correct args");
+                        System.err.println("error: please write correct the correct arguments as the example given");
                         continue;
                     }
                     return new Taddfigdib(opt, msg_tag, req.r.buf);
@@ -126,7 +126,7 @@ public class TcpCli {
                     System.out.print("> ");
                     opt = sc.nextLine();
                     if (!isValidID(opt)) {
-                        System.err.println("error: please write a correct ID of the draw");
+                        System.err.println("error: please write a correct ID for the draw");
                         continue;
                     }
                     return new Tdeldib(Integer.parseInt(opt), msg_tag, req.r.buf);
@@ -135,7 +135,7 @@ public class TcpCli {
                     System.out.print("> ");
                     opt = sc.nextLine();
                     if (!isValidID(opt)) {
-                        System.err.println("error: please write a correct ID of the draw");
+                        System.err.println("error: please write a correct ID for the draw");
                         continue;
                     }
                     return new Tsketchdib(Integer.parseInt(opt), msg_tag, req.r.buf);
@@ -144,7 +144,7 @@ public class TcpCli {
                     System.out.print("> ");
                     opt = sc.nextLine();
                     if (!isValidID(opt)) {
-                        System.err.println("error: please write a correct ID of the draw");
+                        System.err.println("error: please write a correct ID for the draw");
                         continue;
                     }
                     return new Tlistdib(Integer.parseInt(opt), msg_tag, req.r.buf);
@@ -153,7 +153,7 @@ public class TcpCli {
                     System.out.print("> ");
                     opt = sc.nextLine();
                     if (!validArgs(opt)) {
-                        System.err.println("error: please write a correct args");
+                        System.err.println("error: please write correct the correct arguments as the example given");
                         continue;
                     }
                     return new Taddgrpdib(opt, msg_tag, req.r.buf);
@@ -268,7 +268,7 @@ public class TcpCli {
                     System.out.print("> ");
                     String args = sc.nextLine();
                     if (!validArgs(args)) {
-                        System.err.println("error: please write a correct args");
+                        System.err.println("error: please write correct the correct arguments as the example given");
                         continue;
                     }
                     return new Taddfiggrp(args, msg_tag, req.r.buf);

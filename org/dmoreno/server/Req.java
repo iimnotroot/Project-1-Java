@@ -47,7 +47,11 @@ public class Req {
 
     public void reset() {
         this.tag = 0;
-        m.reset();
-        r.reset();
+        if (m!=null) {
+            m.reset();
+        }
+        if (r!=null) {
+            r.reset();
+        }
     }
 }
