@@ -3,111 +3,126 @@ package org.dmoreno.group;
 import org.dmoreno.figures.Figure;
 import org.dmoreno.figures.Point;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 
 public class Group extends Figure {
-    public Figure[] group_figures;
+    public ArrayList<Figure> group_figures;
     Point pos_group;
-    public String name;
-    int current_position = 0;
-    int id;
     /**
      * Creates a group of Figures, named as you want, also it can be created by giving an array of Figures or empty
-     * @param group_name Name of the group
+     * @param id ID of the group
      * @param args Array of Figures
      */
-    public Group(String group_name, Figure... args ) {
-        group_figures = new Figure[0];
-        name = group_name;
+    public Group(int id, Figure... args ) {
+        group_figures = new ArrayList<>();
+        setId(id);
         for (Figure f : args) {
             add(f);
         }
     }
     @Override
     public Point pos(){
-        if (pos_group == null) {
-            System.err.println("error: there is no Figure in the group");
-            System.exit(1);
+        try {
+            if (pos_group == null) {
+                throw new RuntimeException("error: there is no position in the group");
+            }
+            return pos_group;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
-        return pos_group;
+
     }
     @Override
     public void move(int dx, int dy) {
-        int i;
-        for (i=0; i < group_figures.length; i++) {
-            group_figures[i].move(dx,dy);
+        for (Figure fig: group_figures) {
+            fig.move(dx,dy);
         }
-        pos_group.move(dx,dy);
+        if (pos_group != null) {
+            pos_group.move(dx, dy);
+        }
     }
 
-    @Override
-    public void setId(Integer id) {
+    private boolean collision(Figure fig_toadd) {
+
         try {
-            if (id < 0) {
-                throw new RuntimeException("error: id can not be negative");
+            for (Figure fig: group_figures) {
+                if (fig_toadd.pos().x == fig.pos().x && fig_toadd.pos().y == fig.pos().y) {
+                    return true;
+                }
             }
-            this.id = id;
+            return false;
+        } catch (Exception e) {
+            throw new RuntimeException("error: comparison has failed");
+        }
+    }
+
+    public void add(Figure fig){
+        try {
+            if (fig == null) {
+                throw new RuntimeException("error: Figure can not be added because is null");
+            } else {
+                if (group_figures.isEmpty()) {
+                    pos_group = new Point(fig.pos().x,fig.pos().y);
+                }
+                if (collision(fig)) {
+                    throw new RuntimeException("error: figure position crash with another of the group");
+                }
+                group_figures.add(fig);
+            }
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void drop(Figure figtodrop) {
+        try {
+            if (figtodrop == null) {
+                throw new RuntimeException("error: Figure can not be drop because is null");
+            }
+            boolean removed = group_figures.remove(figtodrop);
+            if (!removed) {
+                throw new RuntimeException("error: figure not found in group");
+            }
+
+            if (group_figures.isEmpty()) {
+                pos_group = null;
+            } else {
+                Figure firstFig = group_figures.getFirst();
+                pos_group = new Point(firstFig.pos().x,firstFig.pos().y);
+            }
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void add(Figure fig){
-        if (group_figures == null) {
-            System.err.println("error: Figure can not be added because Group is null");
-            System.exit(1);
-        } else {
-            if (current_position == 0) {
-                pos_group = new Point(fig.pos().x,fig.pos().y);
-            }
-            group_figures = Arrays.copyOf(group_figures, (group_figures.length + 1));
-            group_figures[current_position] = fig;
-            current_position++;
-        }
-    }
-
-    public void drop(int position) {
-        int i;
-
-        if (position < group_figures.length && position >= 0) {
-            for (i=position; i < group_figures.length; i++) {
-                if (i != (group_figures.length - 1)) {
-                    group_figures[i] = group_figures[i+1];
-                }
-            }
-            group_figures = Arrays.copyOf(group_figures, group_figures.length - 1);
-            current_position--;
-
-            if (group_figures.length == 0) {
-                pos_group = null;
-            } else if (position == 0) {
-                pos_group = new Point(group_figures[0].pos().x, group_figures[0].pos().y);
-            }
-
-        } else {
-            System.err.println("error: position exceeds the length of the array group");
-            System.exit(1);
-        }
-
+    public boolean contains(Figure fig) {
+        return group_figures.contains(fig);
     }
     @Override
-    public String toString(){
-        String result = "Group " + name;
-        int i;
-        for (i=0; i < group_figures.length; i++) {
-            if (group_figures[i] != null) {
-                if (i != (group_figures.length - 1) ){
-                    result += group_figures[i].toString() + ",";
-                } else {
-                    result += group_figures[i].toString();
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("Group ID: ").append(id).append(" ");
+        result.append("Figures in Group:\n");
+        result.append(" -");
+
+        for (int idx = 0; idx < group_figures.size(); idx++) {
+            Figure fig = group_figures.get(idx);
+            if ( fig != null) {
+                result.append(fig.toString());
+
+                if (idx != group_figures.size() - 1) {
+                    result.append("\n");
+                    result.append(" -");
                 }
             }
         }
-        return result;
+
+        return result.toString();
     }
 
     public String BuilderString(){
-        return name;
+        return Integer.toString(id);
     }
 
 }

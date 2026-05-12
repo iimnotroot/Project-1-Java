@@ -1,6 +1,12 @@
-package org.dmoreno.server;
+package org.dmoreno.tests;
 
+import org.dmoreno.server.DibSvc;
+import org.dmoreno.server.TcpCli;
+import org.dmoreno.server.TcpSrv;
 import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 public class TestSrv {
     @Test
@@ -18,6 +24,9 @@ public class TestSrv {
         TcpSrv server = new TcpSrv(dib, 8000);
         server.run();
         TcpCli cli = new TcpCli("localhost:8000");
-        cli.run();
+        //cli.run()
+        server.halt();
     }
+
 }
+

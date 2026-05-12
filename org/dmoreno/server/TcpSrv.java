@@ -1,10 +1,7 @@
 package org.dmoreno.server;
 
-import org.dmoreno.server.Msg;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.*;
@@ -70,6 +67,21 @@ public class TcpSrv {
     public synchronized void halt() {
         halting.set(true);
         hangup();
+        synchronized (hashcli) {
+            for (SocketChannel sck : hashcli.keySet()) {
+                try {
+                    sck.close();
+                } catch (IOException e)
+                {
+                    //ignored
+                }
+            }
+        }
+        hashcli.clear();
+    }
+
+    private synchronized void removeClient(SocketChannel sck) {
+        hashcli.remove(sck);
     }
 
     public synchronized Integer addClient(SocketChannel sck) {
@@ -87,7 +99,7 @@ public class TcpSrv {
                     break;
                 }
                 int id_c = addClient(sck);
-                System.out.println("INFO: new connection accepted " + id_c);
+                System.out.println("INFO: new connection accepted client" + id_c);
                 Client cli = new Client(sck, srv, id_c);
                 cli.start();
             }
@@ -131,26 +143,27 @@ public class TcpSrv {
 
         public void endCli() {
             try {
-                System.out.println("INFO: finishing connection with " + id_c + " ...");
-                sck.close();
+                System.out.println("INFO: finishing connection with client" + id_c + " ...");
+                removeClient(sck);
+                if (sck.isOpen()) {
+                    sck.close();
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
         public void handle() {
+            Req req = getReq();
             try {
-                Req req = getReq();
                 while(!halting.get()) {
                     try {
                         req.readFrom(sck);
                         if (req.m == null) {
-                            saveReq(req);
                             return;
                         }
-                        req.reply(svc.handle(req.m));
+                        req.reply(svc.handle(req.m, req.r.buf));
                         if (req.r.kind == Texit) {
-                            saveReq(req);
                             return;
                         }
                         System.out.println("INFO: sending to client " + id_c + " reply: " + req.r.toString());
@@ -162,6 +175,7 @@ public class TcpSrv {
                     }
                 }
             } finally {
+                saveReq(req);
                 endCli();
             }
         }

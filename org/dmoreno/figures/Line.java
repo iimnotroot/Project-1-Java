@@ -42,7 +42,7 @@ public class Line extends SimpleFigure {
     public String toString(){
         Point max = new Point(pos.x, pos.y);
         max.move(lengthx,lengthy);
-        return "ID :"+ id + " Line: [" + pos + "," + max + "]";
+        return "Line: " + "Figure ID : " + id +  " [" + pos + "," + max + "]";
     }
 
 

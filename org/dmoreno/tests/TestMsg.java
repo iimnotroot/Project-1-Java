@@ -1,5 +1,6 @@
-package org.dmoreno.server;
+package org.dmoreno.tests;
 
+import org.dmoreno.server.Msg;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class TestMsg {
         wrc.close();
         int n = 0;
         Msg r;
-        while ((r = Msg.readFrom(rdc)) != null) {
+        while ((r = Msg.readFrom(rdc, null)) != null) {
             System.err.printf("did read %s\n", r);
             n++;
         }
@@ -41,7 +42,7 @@ public class TestMsg {
         t.writeTo(wrc);
         t.writeTo(wrc);
         for (int i = 0; i < 2; i++) {
-            var r = Msg.readFrom(rdc);
+            var r = Msg.readFrom(rdc, null);
             System.err.printf("readed %s\n", r);
             assertNotNull(r);
             assertEquals(t.toString(), r.toString());
@@ -62,6 +63,12 @@ public class TestMsg {
     public void testNewfig() throws IOException {
         testPack(new Msg.Tnewfig("Circle 10 20 5", 0,null));
     }
+
+    @Test
+    public void TestdelGrp() throws IOException {
+        testPack(new Msg.Tdelgrp(0, 0, null));
+    }
+
 
 
 }

@@ -1,14 +1,10 @@
 package org.dmoreno.server;
 
 import org.dmoreno.figures.*;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 
@@ -18,25 +14,34 @@ public class Msg {
 
     public static final int Texit = 22;
 
-    public static final int Tvers = 34; // vers[s] nick[s] buffsize[int]
-    public static final int Rvers = 35; // vers[s] buffsize[int]
+
     public static final int Rerror = 41; // msg[s]
-    public static final int Tnewdib = 50; // name[s]
+    public static final int Tnewdib = 50; //
     public static final int Rnewdib = 51; // id[4] 4 bytes en little endian
-    public static final int Tdeldib = 52; // info[s] id[4]
-    public static final int Rdeldib = 53; //
-    public static final int Tlistdib = 54; // pos[4] n[4]
-    public static final int Rlistdib = 55; // n[4] name[s] ...
-    public static final int Tlistfigs = 56; // dib[4] pos[4] n[4]
-    public static final int Rlistfigs = 57; // n[4] id[4] ...
+    public static final int Tdeldib = 52; // id[4]
+    public static final int Rdeldib = 53; // info[s]
+    public static final int Tlistdib = 54; // id[4]
+    public static final int Rlistdib = 55; // info[s]
+    public static final int Tlistfigs = 56; // id_figs[4]...
+    public static final int Rlistfigs = 57; // info[s]
     public static final int Tnewfig = 58; // args[s]
     public static final int Rnewfig = 59; // info[s] id[4]
-    public static final int Tadddib = 60; //id_dib[4] figs[s](id_figs split with '-')
-    public static final int Radddib = 61; // info[s] id[4]
+    public static final int Taddfigdib = 60; // id_dib[4] figs[s](id_figs split with '-')
+    public static final int Raddfigdib = 61; // info[s]
     public static final int Tsketchdib = 62; // id_dib[4]
     public static final int Rsketchdib = 63; // info[s]
     public static final int Tdelfig = 64; // id_fig[4]
-    public static final int Rdelfig = 65;
+    public static final int Rdelfig = 65; // info[s]
+    public static final int Tnewgrp = 66; // args[s]
+    public static final int Rnewgrp = 67; // id_grp[4]
+    public static final int Tdelgrp = 68; // id_grp[4]
+    public static final int Rdelgrp = 69; // info[s]
+    public static final int Tlistgrp = 70; // id_grp[4]
+    public static final int Rlistgrp = 71; // info[s]
+    public static final int Taddgrpdib = 72; //id_dib[4] grps[s](id_grps split with '-')
+    public static final int Raddgrpdib = 73; //info[s]
+    public static final int Taddfiggrp = 74; //id_grp[4] figs[s](id_figs split with '-')
+    public static final int Raddfiggrp = 75; //info[s]
 
 
     public int tag;
@@ -99,6 +104,13 @@ public class Msg {
     public int getDsize() {
         this.dsize = buf.getInt(DSIZEOFF);
         return this.dsize;
+    }
+
+    public void reset() {
+        buf.clear();
+        setTag(0);
+        setKind(0);
+        setDsize(0);
     }
 
     protected void makeHdr(int newtag, int kind) {
@@ -190,8 +202,11 @@ public class Msg {
     }
 
 
-    public static Msg readFrom(ReadableByteChannel ch) {
-        Msg msg = new Msg();
+    public static Msg readFrom(ReadableByteChannel ch, Msg at) {
+        Msg msg = at;
+        if (msg == null) {
+            msg = new Msg();
+        }
         if (!msg.readHdr(ch)) {
             return null;
         }
@@ -208,7 +223,7 @@ public class Msg {
         Msg parse(ByteBuffer buf);
     }
 
-    public static HashMap<Integer, Parser> parsers;
+    private final static HashMap<Integer, Parser> parsers;
 
     static {
         parsers = new HashMap<>();
@@ -221,8 +236,8 @@ public class Msg {
         parsers.put(Rlistfigs, Rlistfigs::new);
         parsers.put(Tdeldib, Tdeldib::new);
         parsers.put(Rdeldib, Rdeldib::new);
-        parsers.put(Tadddib, Tadddib::new);
-        parsers.put(Radddib, Radddib::new);
+        parsers.put(Taddfigdib, Taddfigdib::new);
+        parsers.put(Raddfigdib, Raddfigdib::new);
         parsers.put(Tsketchdib, Tsketchdib::new);
         parsers.put(Rsketchdib, Rsketchdib::new);
         parsers.put(Tlistdib, Tlistdib::new);
@@ -230,6 +245,16 @@ public class Msg {
         parsers.put(Texit, Texit::new);
         parsers.put(Tdelfig, Tdelfig::new);
         parsers.put(Rdelfig, Rdelfig::new);
+        parsers.put(Tnewgrp, Tnewgrp::new);
+        parsers.put(Rnewgrp, Rnewgrp::new);
+        parsers.put(Tdelgrp, Tdelgrp::new);
+        parsers.put(Rdelgrp, Rdelgrp::new);
+        parsers.put(Tlistgrp, Tlistgrp::new);
+        parsers.put(Rlistgrp, Rlistgrp::new);
+        parsers.put(Taddgrpdib, Taddgrpdib::new);
+        parsers.put(Raddgrpdib, Raddgrpdib::new);
+        parsers.put(Taddfiggrp, Taddfiggrp::new);
+        parsers.put(Raddfiggrp, Raddfiggrp::new);
     }
 
 
@@ -334,7 +359,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " "+ "Draw created with ID: " + Integer.toString(id);
+            return super.toString() + " "+ "Draw created with ID: " + id;
         }
     }
 
@@ -475,7 +500,7 @@ public class Msg {
         }
 
         public String toString() {
-            return super.toString() + " " + "List of figures: " + msg;
+            return super.toString() + " " + "List of figures:\n" + msg;
         }
 
     }
@@ -528,7 +553,6 @@ public class Msg {
                 rdMode();
                 buf.position(HDRSIZE);
                 id = Integer.parseInt(getStr());
-                ;
             } finally {
                 rdMode();
             }
@@ -541,18 +565,18 @@ public class Msg {
 
     }
 
-    public static class Tadddib extends Msg {
+    public static class Taddfigdib extends Msg {
         String args;
-        public Tadddib(String args, int msg_tag, ByteBuffer bufa) {
+        public Taddfigdib(String args, int msg_tag, ByteBuffer bufa) {
             super(bufa, false);
             buf.clear();
-            makeHdr(msg_tag, Tadddib);
+            makeHdr(msg_tag, Taddfigdib);
             this.args = args;
             addStr(args);
             dataDone();
         }
 
-        public Tadddib(ByteBuffer bufa) {
+        public Taddfigdib(ByteBuffer bufa) {
             super(bufa, true);
             try {
                 rdMode();
@@ -570,19 +594,19 @@ public class Msg {
 
     }
 
-    public static class Radddib extends Msg {
+    public static class Raddfigdib extends Msg {
         int id;
 
-        public Radddib(int id, ByteBuffer bufa) {
+        public Raddfigdib(int id, ByteBuffer bufa) {
             super(bufa, false);
             buf.clear();
             this.id = id;
-            makeHdr(0, Radddib);
+            makeHdr(0, Raddfigdib);
             addStr(Integer.toString(id));
             dataDone();
         }
 
-        public Radddib(ByteBuffer bufa) {
+        public Raddfigdib(ByteBuffer bufa) {
             super(bufa, true);
             try {
                 rdMode();
@@ -702,7 +726,7 @@ public class Msg {
             }
         }
 
-        public String toString() {return super.toString() + " " + "List of dib: " + args;}
+        public String toString() {return super.toString() + " " + "List of draw:\n" + args;}
     }
 
     public static class Tdelfig extends Msg {
@@ -756,6 +780,298 @@ public class Msg {
 
         public String toString() {return super.toString() + " " + "Figure with ID: " +  id + " has been deleted";}
     }
+
+    public static class Tnewgrp extends Msg {
+        String args;
+
+        public Tnewgrp(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.args = args;
+            makeHdr(msg_tag, Tnewgrp);
+            addStr(args);
+            dataDone();
+        }
+
+        public Tnewgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {return super.toString() + args;}
+    }
+
+    public static class Rnewgrp extends Msg {
+        int id;
+
+        public Rnewgrp(Integer id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Rnewgrp);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rnewgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {return super.toString() + " Group created with ID: " + id;}
+    }
+
+
+    public static class Tdelgrp extends Msg {
+        int id;
+
+        public Tdelgrp(int id, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(msg_tag, Tdelgrp);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Tdelgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + id;
+        }
+
+
+    }
+
+    public static class Rdelgrp extends Msg {
+        int id;
+
+        public Rdelgrp(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Rdelgrp);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Rdelgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + "Group deleted with ID: " + id;
+        }
+
+    }
+
+    public static class Tlistgrp extends Msg {
+        String args;
+
+        public Tlistgrp(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Tlistgrp);
+            this.args = args;
+            addStr(args);
+            dataDone();
+        }
+
+        public Tlistgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + args;
+        }
+
+    }
+
+    public static class Rlistgrp extends Msg {
+        String msg;
+
+        public Rlistgrp(String msg, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.msg = msg;
+            makeHdr(0, Rlistgrp);
+            addStr(msg);
+            dataDone();
+        }
+
+        public Rlistgrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                msg = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + "Group list:\n" + msg;
+        }
+
+    }
+
+    public static class Taddgrpdib extends Msg {
+        String args;
+        public Taddgrpdib(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Taddgrpdib);
+            this.args = args;
+            addStr(args);
+            dataDone();
+        }
+
+        public Taddgrpdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + args;
+
+        }
+
+    }
+
+    public static class Raddgrpdib extends Msg {
+        int id;
+
+        public Raddgrpdib(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Raddgrpdib);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Raddgrpdib(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + "Groups added to the dib " +id;
+        }
+
+
+    }
+
+
+
+    public static class Taddfiggrp extends Msg {
+        String args;
+        public Taddfiggrp(String args, int msg_tag, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            makeHdr(msg_tag, Taddfiggrp);
+            this.args = args;
+            addStr(args);
+            dataDone();
+        }
+
+        public Taddfiggrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                args = getStr();
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + args;
+
+        }
+
+    }
+
+    public static class Raddfiggrp extends Msg {
+        int id;
+
+        public Raddfiggrp(int id, ByteBuffer bufa) {
+            super(bufa, false);
+            buf.clear();
+            this.id = id;
+            makeHdr(0, Raddfiggrp);
+            addStr(Integer.toString(id));
+            dataDone();
+        }
+
+        public Raddfiggrp(ByteBuffer bufa) {
+            super(bufa, true);
+            try {
+                rdMode();
+                buf.position(HDRSIZE);
+                id = Integer.parseInt(getStr());
+            } finally {
+                rdMode();
+            }
+        }
+
+        public String toString() {
+            return super.toString() + " " + "Figure/s added to the group with ID: " + id;
+        }
+
+
+    }
+
+
 
 }
 

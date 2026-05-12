@@ -1,16 +1,15 @@
 package org.dmoreno.figures;
 
 import org.dmoreno.FigureAttributes.Color;
-import org.dmoreno.FigureAttributes.Name;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public abstract class Figure {
     public Color color;
-    public Name name;
+    protected int id;
+
 
     /**
      * Returns the main org.dmoreno.figures.Point of the org.dmoreno.figures.SimpleFigure
@@ -28,7 +27,22 @@ public abstract class Figure {
      * Print line
      */
 
-    public abstract void setId(Integer id);
+    public void setId(Integer id) {
+        try {
+            if (id < 0) {
+                throw new RuntimeException("error: id can not be negative");
+            }
+            this.id = id;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+
 
     public abstract String toString();
 
@@ -110,19 +124,6 @@ public abstract class Figure {
         }
     }
 
-    /**
-     * Set name of the Figure
-     */
-    public void setName(String str) {
-        try {
-            if (str == null) {
-                throw new RuntimeException("error: string can not be null");
-            }
-            name = new Name(str);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
-    }
 
     interface Parser {
         Figure parse(String[] args, BufferedReader rd);

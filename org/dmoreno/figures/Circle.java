@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 
 public class Circle extends SimpleFigure{
     private int radius;
-
     /**
      * Creates a new Circle given a center point and a radius
      * @param p Point representing the center of the Circle
@@ -58,15 +57,14 @@ public class Circle extends SimpleFigure{
 
     public void modify_radius(int new_r) {
         if (new_r <= 0){
-            System.err.println("error: radius can not be a negative number or zero");
-            System.exit(1);
+            throw new RuntimeException("error: radius can not be a negative number or zero");
         }
         radius = new_r;
     }
 
     @Override
     public String toString() {
-        return "ID: " + id + " Circle: [" + pos + "," + "rad=" + radius + "]";
+        return "Circle: " + "Figure ID: " + id + " [" + pos + "," + "rad=" + radius + "]";
     }
 
     public String BuilderString(){
