@@ -52,7 +52,7 @@ public class DibSvc implements Svc{
         try {
             id = Integer.parseInt(str);
         } catch (NumberFormatException e) {
-            throw new RuntimeException(e.getMessage());
+            throw e;
         }
         return id;
     }
@@ -61,12 +61,8 @@ public class DibSvc implements Svc{
         String[] id_str = figs.split("-");
         Integer[] figs_ids = new Integer[id_str.length];
         int i;
-        try {
-            for (i=0; i<id_str.length; i++) {
-                figs_ids[i] = Integer.parseInt(id_str[i]);
-            }
-        } catch (NumberFormatException e) {
-            throw new RuntimeException(e.getMessage());
+        for (i=0; i<id_str.length; i++) {
+            figs_ids[i] = Integer.parseInt(id_str[i]);
         }
         return figs_ids;
     }
@@ -80,7 +76,7 @@ public class DibSvc implements Svc{
                 draw.setName(String.format("Dib%d", draw_id));
                 return draw_id;
             } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
+                throw e;
             }
         }
 
@@ -101,7 +97,7 @@ public class DibSvc implements Svc{
                 }
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
 
     }
@@ -125,7 +121,7 @@ public class DibSvc implements Svc{
                 return lFigs;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -148,7 +144,7 @@ public class DibSvc implements Svc{
                 return lGrps;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -168,7 +164,7 @@ public class DibSvc implements Svc{
                 return dib;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
 
     }
@@ -201,7 +197,7 @@ public class DibSvc implements Svc{
                 return fig_id;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -228,7 +224,7 @@ public class DibSvc implements Svc{
                 return grp_id;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -262,7 +258,7 @@ public class DibSvc implements Svc{
                 return draw_id;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -295,7 +291,7 @@ public class DibSvc implements Svc{
                 return draw_id;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -329,7 +325,7 @@ public class DibSvc implements Svc{
 
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -355,7 +351,7 @@ public class DibSvc implements Svc{
                 return draw_id;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
 
     }
@@ -416,7 +412,7 @@ public class DibSvc implements Svc{
                 return list;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
@@ -445,7 +441,7 @@ public class DibSvc implements Svc{
                 return id_grp;
             }
         } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            throw e;
         }
     }
 
